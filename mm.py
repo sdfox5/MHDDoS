@@ -11,8 +11,8 @@ bot = telebot.TeleBot(TOKEN)
 # Allowed Admins to use specific commands
 ALLOWED_USERS = [7179739121]  # Add Admin IDs here
 
-# VIP Users and their remaining days
-vip_users = {}
+# VIP Users and their remaining days (now defined as a dictionary)
+vip_users = {7179739121: 30}  # Example: {user_id: days_left}
 
 # Active attacks tracking
 active_attacks = {}
@@ -21,7 +21,7 @@ active_attacks = {}
 def handle_start_command(message):
     try:
         user_id = message.from_user.id
-        days_left = vip_users.get(user_id, 0)
+        days_left = vip_users.get(user_id, 0)  # Using .get() on a dictionary
 
         text = (
             f"🤖 *WELCOME TO THE CRASH BOT!*\n\n"
@@ -45,8 +45,8 @@ def handle_lag_command(message):
     try:
         user_id = message.from_user.id
 
-        if vip_users.get(user_id, 0) <= 0:
-            bot.reply_to(message, "🚫 YOU MUST BE A VIP TO USE THIS COMMAND!")
+        if user_id not in ALLOWED_USERS and vip_users.get(user_id, 0) <= 0:
+            bot.reply_to(message, "🚫 YOU MUST BE A VIP OR AN ALLOWED USER TO USE THIS COMMAND!")
             return
 
         command_parts = message.text.split()
@@ -118,6 +118,29 @@ def stop_attack(call):
     except Exception as e:
         bot.answer_callback_query(call.id, f"AN ERROR OCCURRED: {str(e)}")
         bot.send_message(call.message.chat.id, f"AN ERROR OCCURRED: {str(e)}")
+
+@bot.message_handler(commands=['addvip'])
+def handle_addvip_command(message):
+    try:
+        user_id = message.from_user.id
+
+        if user_id not in ALLOWED_USERS:
+            bot.reply_to(message, "🚫 YOU ARE NOT AUTHORIZED TO USE THIS COMMAND!")
+            return
+
+        command_parts = message.text.split()
+        if len(command_parts) != 3:
+            bot.reply_to(message, "⚠️ CORRECT USAGE: /addvip <USER_ID> <DAYS>", parse_mode="Markdown")
+            return
+
+        new_vip_user_id = int(command_parts[1])
+        days = int(command_parts[2])
+
+        vip_users[new_vip_user_id] = days
+
+        bot.reply_to(message, f"✅ USER {new_vip_user_id} HAS BEEN ADDED TO VIP FOR {days} DAYS.")
+    except Exception as e:
+        bot.reply_to(message, f"AN ERROR OCCURRED: {str(e)}")
 
 print("BOT IS RUNNING...")
 bot.polling()
