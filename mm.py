@@ -2,6 +2,7 @@ import telebot
 import os
 import signal
 import subprocess
+import time
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # Telegram Bot Token
@@ -9,13 +10,28 @@ TOKEN = "8169647707:AAEtsBvZwY67VqnSGcpsgQz9-L6v79aW4uE"
 bot = telebot.TeleBot(TOKEN)
 
 # Allowed Admins to use specific commands
-ALLOWED_USERS = [7179739121]  # Add Admin IDs here
+ALLOWED_USERS = [7179739121, 7748372347, 7919683325, 1699968906]  # Add Admin IDs here
 
-# VIP Users and their remaining days (now defined as a dictionary)
-vip_users = {7179739121: 30}  # Example: {user_id: days_left}
+# VIP Users and their remaining days
+vip_users = {
+    7748372347: 307179739121,  # إضافة المستخدم الأول مع 30 يومًا
+    1699968906: 371797391210,  # إضافة المستخدم الثاني مع 30 يومًا
+    7919683325: 307179739121,
+    7179739121: 707179739121# إضافة المستخدم الثالث مع 30 يومًا
+}
 
 # Active attacks tracking
 active_attacks = {}
+
+def start_bot():
+    while True:
+        try:
+            print("BOT IS RUNNING...")
+            bot.polling(none_stop=True, interval=0)  # تشغيل البوت
+        except Exception as e:
+            print(f"AN ERROR OCCURRED: {str(e)}")
+            print("RESTARTING BOT IN 5 SECONDS...")
+            time.sleep(5)  # انتظار 5 ثواني قبل إعادة التشغيل
 
 @bot.message_handler(commands=['start'])
 def handle_start_command(message):
@@ -142,5 +158,5 @@ def handle_addvip_command(message):
     except Exception as e:
         bot.reply_to(message, f"AN ERROR OCCURRED: {str(e)}")
 
-print("BOT IS RUNNING...")
-bot.polling()
+# تشغيل البوت بشكل دائم
+start_bot()
